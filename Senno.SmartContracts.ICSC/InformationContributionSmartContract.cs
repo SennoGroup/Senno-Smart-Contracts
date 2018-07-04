@@ -17,8 +17,8 @@ namespace Senno.SmartContracts
         public static int SwapRate() => 1000;
 
         // TODO set ScriptHash of deployed SennoTokenSmartContract HERE
-        [Appcall("bb3874968979fea4083e70c62a09825fff13d7f5")]
-        public static extern bool Transfer(byte[] from, byte[] to, BigInteger amount);
+        [Appcall("d31b0b6440ecebe0861f4683831c04a0cd497943")]
+        public static extern object TokenSmartContract(string method, params object[] args);
 
         public static object Main(string operation, object[] args)
         {
@@ -39,15 +39,11 @@ namespace Senno.SmartContracts
             // get current payload from storage by address 'to'
             var currentPayload = Storage.Get(Storage.CurrentContext, to).AsBigInteger();
 
-            // calculate total payload
-            currentPayload += payload;
-
-            // calculate and transfer tokens
             // return the rest of the current payload
-            currentPayload = CalculateAndTransferTokens(from, to, payload, currentPayload);
+            var restPayload = CalculateAndTransferTokens(from, to, currentPayload + payload);
 
             // save current payload to storage by address 'to'
-            Storage.Put(Storage.CurrentContext, to, currentPayload);
+            Storage.Put(Storage.CurrentContext, to, restPayload);
 
             return true;
         }
@@ -74,10 +70,10 @@ namespace Senno.SmartContracts
 
             // calculate and transfer tokens
             // return the rest of the current payload
-            currentPayload = CalculateAndTransferTokens(from, to, payload, currentPayload);
+            var restPayload = CalculateAndTransferTokens(from, to, payload);
 
             // save current payload to storage by address 'to'
-            Storage.Put(Storage.CurrentContext, to, currentPayload);
+            Storage.Put(Storage.CurrentContext, to, currentPayload - restPayload);
 
             return true;
         }
@@ -93,28 +89,28 @@ namespace Senno.SmartContracts
             return true;
         }
 
-        private static BigInteger CalculateAndTransferTokens(byte[] from, byte[] to, BigInteger payload, BigInteger currentPayload)
+        private static BigInteger CalculateAndTransferTokens(byte[] from, byte[] to, BigInteger payload)
         {
             // check that addresses 'from' and 'to' do not match
             if (from != to)
             {
                 // calculte tokens count by swap rate
-                var tokensCount = currentPayload / SwapRate();
+                var tokensCount = payload / SwapRate();
 
                 // if the tokensCount is greater than zero
                 if (tokensCount > 0)
                 {
                     // call external method for transfer token to address 'to'
-                    if (Transfer(from, to, tokensCount))
+                    if (((bool)TokenSmartContract("transfer", from, to, tokensCount)))
                     {
                         // if the transfer operation is successful
                         // calculate the rest of the current payload
-                        currentPayload = currentPayload % SwapRate();
+                        payload = payload % SwapRate();
                     }
                 }
             }
 
-            return currentPayload;
+            return payload;
         }
     }
 }
