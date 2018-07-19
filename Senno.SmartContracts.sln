@@ -7,6 +7,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Senno.SmartContracts.ICSC",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Senno.SmartContracts.Token", "Senno.SmartContracts.Token\Senno.SmartContracts.Token.csproj", "{1AA2E643-8229-4E39-921F-6359795866D7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Senno.SmartContracts.Common", "Senno.SmartContracts.Common\Senno.SmartContracts.Common.csproj", "{F96F453B-F15A-42E1-8360-1EE89C1110A4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Senno.SmartContracts.SADSC", "Senno.SmartContracts.SADSC\Senno.SmartContracts.SADSC.csproj", "{D573AF1C-5C22-4496-8D86-61CB81DD4B9B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Senno.SmartContracts.SMSC", "Senno.SmartContracts.SMSC\Senno.SmartContracts.SMSC.csproj", "{B3518146-6094-4EC0-9D5E-FD9CE54601C2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Senno.SmartContracts.SPDSC", "Senno.SmartContracts.SPDSC\Senno.SmartContracts.SPDSC.csproj", "{EB25EEA2-7A4A-497A-A7C1-D4164F53EDA6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Senno.SmartContracts.SRSC", "Senno.SmartContracts.SRSC\Senno.SmartContracts.SRSC.csproj", "{240B793B-AE47-4266-83CF-9EC61D758600}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +31,26 @@ Global
 		{1AA2E643-8229-4E39-921F-6359795866D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1AA2E643-8229-4E39-921F-6359795866D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1AA2E643-8229-4E39-921F-6359795866D7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F96F453B-F15A-42E1-8360-1EE89C1110A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F96F453B-F15A-42E1-8360-1EE89C1110A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F96F453B-F15A-42E1-8360-1EE89C1110A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F96F453B-F15A-42E1-8360-1EE89C1110A4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D573AF1C-5C22-4496-8D86-61CB81DD4B9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D573AF1C-5C22-4496-8D86-61CB81DD4B9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D573AF1C-5C22-4496-8D86-61CB81DD4B9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D573AF1C-5C22-4496-8D86-61CB81DD4B9B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B3518146-6094-4EC0-9D5E-FD9CE54601C2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3518146-6094-4EC0-9D5E-FD9CE54601C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3518146-6094-4EC0-9D5E-FD9CE54601C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3518146-6094-4EC0-9D5E-FD9CE54601C2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EB25EEA2-7A4A-497A-A7C1-D4164F53EDA6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB25EEA2-7A4A-497A-A7C1-D4164F53EDA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB25EEA2-7A4A-497A-A7C1-D4164F53EDA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB25EEA2-7A4A-497A-A7C1-D4164F53EDA6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{240B793B-AE47-4266-83CF-9EC61D758600}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{240B793B-AE47-4266-83CF-9EC61D758600}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{240B793B-AE47-4266-83CF-9EC61D758600}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{240B793B-AE47-4266-83CF-9EC61D758600}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

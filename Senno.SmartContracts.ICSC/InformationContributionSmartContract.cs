@@ -1,6 +1,6 @@
 ﻿using Neo.SmartContract.Framework;
 using Neo.SmartContract.Framework.Services.Neo;
-using Neo.SmartContract.Framework.Services.System;
+using Senno.SmartContracts.Common;
 using System.Numerics;
 
 namespace Senno.SmartContracts
@@ -14,7 +14,7 @@ namespace Senno.SmartContracts
     public class InformationContributionSmartContract : SmartContract
     {
         // payload exchange rate
-        public static int SwapRate() => 1000;
+        public static int SwapRate() => Configuration.InformationContributionSmartContractSwapRate;
 
         // TODO set ScriptHash of deployed SennoTokenSmartContract HERE
         [Appcall("d31b0b6440ecebe0861f4683831c04a0cd497943")]

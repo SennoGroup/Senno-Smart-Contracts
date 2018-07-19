@@ -1,5 +1,6 @@
 ﻿using Neo.SmartContract.Framework;
 using Neo.SmartContract.Framework.Services.Neo;
+using Senno.SmartContracts.Common;
 using System.ComponentModel;
 using System.Numerics;
 
@@ -7,29 +8,28 @@ namespace Senno.SmartContracts
 {
     public class TokenSmartContract : SmartContract
     {
-        public static readonly byte[] owner = "APgeXL3KRP1kGf4MVPLF2muRUB8U6s5cgz".ToScriptHash();
+        public static readonly byte[] owner = Neo.SmartContract.Framework.Helper.HexToBytes(Configuration.TokenSmartContractOwner);
 
         // Token Settings
-        public static string Name() => "Senno";
-        public static string Symbol() => "SEN";
-        public static byte Decimals() => 0;
-        private const ulong initSupply = 10000000000;
+        public static string Name() => Configuration.TokenSmartContractName;
+        public static string Symbol() => Configuration.TokenSmartContractSymbol;
+        public static byte Decimals() => Configuration.TokenSmartContractDecimals;
+        private const ulong initSupply = Configuration.TokenSmartContractInitSupply;
 
         public delegate void TransferAction<in T, in T1, in T2>(T p0, T1 p1, T2 p3);
 
         [DisplayName("transfer")]
         public static event TransferAction<byte[], byte[], BigInteger> Transferred;
 
-
-        public static object Main(string method, params object[] args)
+        public static object Main(string operation, params object[] args)
         {
-            if (method == "deploy") return Deploy();
-            if (method == "totalSupply") return TotalSupply();
-            if (method == "name") return Name();
-            if (method == "symbol") return Symbol();
-            if (method == "owner") return owner;
-            if (method == "decimals") return Decimals();
-            if (method == "transfer")
+            if (operation == "deploy") return Deploy();
+            if (operation == "totalSupply") return TotalSupply();
+            if (operation == "name") return Name();
+            if (operation == "symbol") return Symbol();
+            if (operation == "owner") return owner;
+            if (operation == "decimals") return Decimals();
+            if (operation == "transfer")
             {
                 if (args.Length != 3) return false;
                 byte[] from = (byte[])args[0];
@@ -37,7 +37,7 @@ namespace Senno.SmartContracts
                 BigInteger value = (BigInteger)args[2];
                 return Transfer(from, to, value);
             }
-            if (method == "balanceOf")
+            if (operation == "balanceOf")
             {
                 if (args.Length != 1) return 0;
                 byte[] account = (byte[])args[0];
@@ -69,11 +69,14 @@ namespace Senno.SmartContracts
         /// <param name="to"></param>
         /// <param name="value"></param>
         /// <returns></returns>
-        private static bool Transfer(byte[] from, byte[] to, BigInteger value)
+        public static bool Transfer(byte[] from, byte[] to, BigInteger value)
         {
-            if (value <= 0) return false;
             // Verifies that the calling contract has verified the required script hashes of the transaction/block
-            //if (!Runtime.CheckWitness(from)) return false;
+            if (!Runtime.CheckWitness(from))
+            {
+                return false;
+            }
+            if (value <= 0) return false;
             // Address only
             if (to.Length != 20) return false;
 
@@ -104,7 +107,7 @@ namespace Senno.SmartContracts
         /// Get the total token supply
         /// </summary>
         /// <returns></returns>
-        public static BigInteger TotalSupply()
+        private static BigInteger TotalSupply()
         {
             return Storage.Get(Storage.CurrentContext, "totalSupply").AsBigInteger();
         }
@@ -114,7 +117,7 @@ namespace Senno.SmartContracts
         /// </summary>
         /// <param name="address"></param>
         /// <returns></returns>
-        public static BigInteger BalanceOf(byte[] address)
+        private static BigInteger BalanceOf(byte[] address)
         {
             return Storage.Get(Storage.CurrentContext, address).AsBigInteger();
         }
