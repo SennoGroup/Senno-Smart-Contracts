@@ -41,6 +41,24 @@
         public const int InformationContributionSmartContractSwapRate = 1000;
 
         #endregion
-       
+
+        #region SADSC
+
+        /// <summary>
+        /// Payload exchange rate for Analysis Dispatcher smart contract
+        /// </summary>
+        public const int AnalysisDispatcherSmartContractSwapRate = 1000;
+
+        #endregion
+
+        #region SPDSC
+
+        /// <summary>
+        /// Payload exchange rate for Parse Dispatcher smart contract
+        /// </summary>
+        public const int ParseDispatcherSmartContractSwapRate = 1000;
+
+        #endregion
+
     }
 }

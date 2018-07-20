@@ -13,6 +13,11 @@ namespace Senno.SmartContracts.SPDSC
         /// </summary>
         public static ushort InitialVerificationNeeded = 2;
 
+        /// <summary>
+        /// Name of the RewardsSmartContractScriptHash operation
+        /// </summary>
+        public static string RewardsOperationName = "parse";
+
         // TODO set RewardsSmartContractScriptHash
         [Appcall("d31b0b6440ecebe0861f4683831c04a0cd497943")]
         public static extern object RewardsSmartContract(string method, params object[] args);
@@ -106,7 +111,7 @@ namespace Senno.SmartContracts.SPDSC
         {
             // get task number from arguments
             BigInteger taskNumber = (BigInteger)args[0];
-            // get caller public key from arguments
+            // get caller address from arguments
             byte[] caller = (byte[])args[1];
 
             // get task from storage
@@ -126,7 +131,7 @@ namespace Senno.SmartContracts.SPDSC
                 return false;
             }
 
-            // set task owner public key
+            // set task owner address
             task.Owner = caller;
 
             // set task status
@@ -148,7 +153,7 @@ namespace Senno.SmartContracts.SPDSC
         {
             // get task number from arguments
             BigInteger taskNumber = (BigInteger)args[0];
-            // get caller public key from arguments
+            // get caller address from arguments
             byte[] caller = (byte[])args[1];
             // get destination file hash from arguments
             string destination = (string)args[2];
@@ -184,7 +189,7 @@ namespace Senno.SmartContracts.SPDSC
                 task.IsSuccess = true;
 
                 // finish
-                FinishTask(task);
+                FinishTask(task, null);
 
             }
             return true;
@@ -197,7 +202,7 @@ namespace Senno.SmartContracts.SPDSC
         {
             // get task number from arguments
             string taskNumber = (string)args[0];
-            // get caller public key from arguments
+            // get caller address from arguments
             byte[] caller = (byte[])args[1];
             // get verify result from arguments
             bool result = (bool)args[2];
@@ -224,11 +229,13 @@ namespace Senno.SmartContracts.SPDSC
             // if the number of verify results is complete
             if (task.VerificationNeeded == 0)
             {
+                byte[][] verificators = new byte[task.Verifications.Length][];
                 // calculating the success of a task
                 int successResults = 0;
                 for (int i = 0; i < task.Verifications.Length; i++)
                 {
                     var verification = task.Verifications[i];
+                    verificators[i] = task.Owner;
                     if (verification.Result)
                     {
                         successResults = successResults + 1;
@@ -239,7 +246,7 @@ namespace Senno.SmartContracts.SPDSC
                 task.IsSuccess = successResults > task.Verifications.Length;
 
                 // finish
-                FinishTask(task);
+                FinishTask(task, verificators);
             }
 
             return true;
@@ -249,7 +256,7 @@ namespace Senno.SmartContracts.SPDSC
         /// Task finished operation
         /// </summary>
         /// <param name="task"></param>
-        private static void FinishTask(Task task)
+        private static void FinishTask(Task task, byte[][] verificators)
         {
             if (task.Status != (byte)TaskStatusEnum.Finished)
             {
@@ -265,8 +272,10 @@ namespace Senno.SmartContracts.SPDSC
 
                 if (task.IsSuccess)
                 {
-                    // TODO
-                    // RewardsSmartContract("parse", task.Owner);
+                    // TODO calculate payload
+                    BigInteger payload = 0;
+                    // rewards
+                    RewardsSmartContract(RewardsOperationName, task.Owner, payload, verificators);
                 }
 
                 // event for platform
@@ -274,11 +283,18 @@ namespace Senno.SmartContracts.SPDSC
             }
         }
 
+        /// <summary>
+        /// Returns the total number of tasks
+        /// </summary>
         private static BigInteger GetTasksCounter()
         {
             return Storage.Get(Storage.CurrentContext, "tasksCounter").AsBigInteger();
         }
 
+        /// <summary>
+        /// Sets the total number of tasks
+        /// </summary>
+        /// <param name="tasksCounter">Total number of tasks</param>
         private static void SetTasksCounter(BigInteger tasksCounter)
         {
             Storage.Put(Storage.CurrentContext, "tasksCounter", tasksCounter);
