@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Numerics;
 
 namespace Senno.SmartContracts.Common
 {
@@ -16,5 +16,10 @@ namespace Senno.SmartContracts.Common
         /// Verisifation result
         /// </summary>
         public bool Result;
+
+        /// <summary>
+        /// Task payload
+        /// </summary>
+        public BigInteger Payload;
     }
 }

@@ -51,6 +51,12 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Senno.SmartContracts.Common\Senno.SmartContracts.Common.csproj">
+      <Project>{f96f453b-f15a-42e1-8360-1ee89c1110a4}</Project>
+      <Name>Senno.SmartContracts.Common</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>neon $(TargetPath) --compatible</PostBuildEvent>

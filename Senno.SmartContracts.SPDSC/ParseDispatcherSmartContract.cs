@@ -157,6 +157,8 @@ namespace Senno.SmartContracts.SPDSC
             byte[] caller = (byte[])args[1];
             // get destination file hash from arguments
             string destination = (string)args[2];
+            // get payload from arguments
+            BigInteger payload = (BigInteger)args[3];
 
             // get task from storage
             StorageMap task_sm = Storage.CurrentContext.CreateMap("task");
@@ -170,6 +172,8 @@ namespace Senno.SmartContracts.SPDSC
 
             // set destination file hash
             task.Destination = destination;
+            // set task payload
+            task.Payload = payload;
 
             // if verification is needed
             if (task.VerificationNeeded > 0)
@@ -189,7 +193,7 @@ namespace Senno.SmartContracts.SPDSC
                 task.IsSuccess = true;
 
                 // finish
-                FinishTask(task, null);
+                FinishTask(task, null, task.Payload);
 
             }
             return true;
@@ -206,6 +210,8 @@ namespace Senno.SmartContracts.SPDSC
             byte[] caller = (byte[])args[1];
             // get verify result from arguments
             bool result = (bool)args[2];
+            // get payload from arguments
+            BigInteger payload = (BigInteger)args[3];
 
             // get task from storage
             StorageMap task_sm = Storage.CurrentContext.CreateMap("task");
@@ -221,7 +227,8 @@ namespace Senno.SmartContracts.SPDSC
             task.Verifications[task.Verifications.Length - task.VerificationNeeded] = new Verification()
             {
                 Owner = caller,
-                Result = result
+                Result = result,
+                Payload = payload
             };
 
             task.VerificationNeeded = task.VerificationNeeded - 1;
@@ -232,6 +239,7 @@ namespace Senno.SmartContracts.SPDSC
                 byte[][] verificators = new byte[task.Verifications.Length][];
                 // calculating the success of a task
                 int successResults = 0;
+                BigInteger sumPayload = 0;
                 for (int i = 0; i < task.Verifications.Length; i++)
                 {
                     var verification = task.Verifications[i];
@@ -239,14 +247,21 @@ namespace Senno.SmartContracts.SPDSC
                     if (verification.Result)
                     {
                         successResults = successResults + 1;
+                        sumPayload = sumPayload + verification.Payload;
                     }
+                }
+
+                BigInteger avgPayload = 0;
+                if (successResults > 0)
+                {
+                    avgPayload = sumPayload / successResults;
                 }
 
                 // set the success of a task
                 task.IsSuccess = successResults > task.Verifications.Length;
 
                 // finish
-                FinishTask(task, verificators);
+                FinishTask(task, verificators, avgPayload);
             }
 
             return true;
@@ -256,7 +271,7 @@ namespace Senno.SmartContracts.SPDSC
         /// Task finished operation
         /// </summary>
         /// <param name="task"></param>
-        private static void FinishTask(Task task, byte[][] verificators)
+        private static void FinishTask(Task task, byte[][] verificators, BigInteger payload)
         {
             if (task.Status != (byte)TaskStatusEnum.Finished)
             {
@@ -272,8 +287,6 @@ namespace Senno.SmartContracts.SPDSC
 
                 if (task.IsSuccess)
                 {
-                    // TODO calculate payload
-                    BigInteger payload = 0;
                     // rewards
                     RewardsSmartContract(RewardsOperationName, task.Owner, payload, verificators);
                 }

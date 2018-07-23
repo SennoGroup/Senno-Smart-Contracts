@@ -33,6 +33,11 @@ namespace Senno.SmartContracts.Common
         public string Destination;
 
         /// <summary>
+        /// Task payload
+        /// </summary>
+        public BigInteger Payload;
+
+        /// <summary>
         /// Number of verifications required
         /// </summary>
         public int VerificationNeeded;
