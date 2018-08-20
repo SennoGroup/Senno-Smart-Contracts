@@ -8,19 +8,20 @@ namespace Senno.SmartContracts.SRSC
 {
     public class RewardsSmartContract : SmartContract
     {
-
-        // payload exchange rate
+        // payload exchange rate for analys
         public static int AnalysisSwapRate() => Configuration.AnalysisDispatcherSmartContractSwapRate;
 
-        // payload exchange rate
+        // payload exchange rate for parse
         public static int ParseSwapRate() => Configuration.ParseDispatcherSmartContractSwapRate;
 
-        [Appcall("d31b0b6440ecebe0861f4683831c04a0cd497943")]
+        // safestore of SEN tokens
+        public static readonly byte[] coinBase = Neo.SmartContract.Framework.Helper.HexToBytes(Configuration.TokenSmartContractOwner);
+
+        [Appcall("849f7fd094ac87bd3a797d2fdaddcd927050d686")]
         public static extern object TokenSmartContract(string method, params object[] args);
 
-
         /// <summary>
-        /// 
+        /// Smart contract entry method
         /// </summary>
         /// <param name="operation"></param>
         /// <param name="args"></param>
@@ -28,66 +29,35 @@ namespace Senno.SmartContracts.SRSC
         public static object Main(string operation, params object[] args)
         {
             // create new job
-            if (operation == "parse")
+            if (operation == Operations.Parse)
             {
-                return RewardsForParse(args);
+                return RewardsForTask((byte[])args[0], (BigInteger)args[1], (object[])args[2], ParseSwapRate());
             }
             // call next step of job
-            if (operation == "analysis")
+            if (operation == Operations.Analysis)
             {
-                return RewardsForAnalysis(args);
+                return RewardsForTask((byte[])args[0], (BigInteger)args[1], (object[])args[2], AnalysisSwapRate());
             }
 
             return false;
         }
 
         /// <summary>
-        /// 
+        /// Rewards for task
         /// </summary>
-        /// <param name="args"></param>
+        /// <param name="taskWorker"></param>
+        /// <param name="payload"></param>
+        /// <param name="taskVerificators"></param>
         /// <returns></returns>
-        private static object RewardsForParse(params object[] args)
+        private static object RewardsForTask( byte[] taskWorker, BigInteger payload, object[] taskVerificators, int swapRate)
         {
-            // get task worker address from arguments
-            byte[] taskWorker = (byte[])args[0];
-            BigInteger payload = (BigInteger)args[1];
-
-            Rewards(ExecutionEngine.CallingScriptHash, taskWorker, payload, ParseSwapRate());
-            
-            // get task verificators addresses from arguments
-            byte[][] taskVerificators = (byte[][])args[2];
-
-            if(taskVerificators != null && taskVerificators.Length > 0)
-            {
-                foreach(byte[] verificator in taskVerificators)
-                {
-                    Rewards(ExecutionEngine.CallingScriptHash, verificator, payload, ParseSwapRate() * 3 );
-                }
-            }
-            return true;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="args"></param>
-        /// <returns></returns>
-        private static object RewardsForAnalysis(params object[] args)
-        {
-            // get task worker address from arguments
-            byte[] taskWorker = (byte[])args[0];
-            BigInteger payload = (BigInteger)args[1];
-
-            Rewards(ExecutionEngine.CallingScriptHash, taskWorker, payload, AnalysisSwapRate());
-
-            // get task verificators addresses from arguments
-            byte[][] taskVerificators = (byte[][])args[2];
+            Rewards(taskWorker, payload, swapRate);
 
             if (taskVerificators != null && taskVerificators.Length > 0)
             {
                 foreach (byte[] verificator in taskVerificators)
                 {
-                    Rewards(ExecutionEngine.CallingScriptHash, verificator, payload, AnalysisSwapRate() * 3);
+                    Rewards(verificator, payload, swapRate * 3);
                 }
             }
             return true;
@@ -96,7 +66,7 @@ namespace Senno.SmartContracts.SRSC
         /// <summary>
         /// Pay reward to address
         /// </summary>
-        private static object Rewards(byte[] from, byte[] to, BigInteger payload, int swapRate)
+        private static void Rewards(byte[] to, BigInteger payload, int swapRate)
         {
             // get stored payload from storage by address 'to'
             var storedPayload = Storage.Get(Storage.CurrentContext, to).AsBigInteger();
@@ -104,18 +74,23 @@ namespace Senno.SmartContracts.SRSC
 
             // calculate and transfer tokens
             // return the rest of the current payload
-            var restPayload = CalculateAndTransferTokens(from, to, storedPayload + payload, swapRate);
+            var restPayload = CalculateAndTransferTokens(to, storedPayload + payload, swapRate);
 
             // save current payload to storage by address 'to'
             Storage.Put(Storage.CurrentContext, to, restPayload);
-
-            return true;
         }
 
-        private static BigInteger CalculateAndTransferTokens(byte[] from, byte[] to, BigInteger payload, int swapRate)
+        /// <summary>
+        /// Calculate tokens amount and transfer
+        /// </summary>
+        /// <param name="to"></param>
+        /// <param name="payload"></param>
+        /// <param name="swapRate"></param>
+        /// <returns></returns>
+        private static BigInteger CalculateAndTransferTokens(byte[] to, BigInteger payload, int swapRate)
         {
             // check that addresses 'from' and 'to' do not match
-            if (from != to)
+            if (coinBase != to)
             {
                 // calculte tokens count by swap rate
                 var tokensCount = payload / swapRate;
@@ -124,11 +99,11 @@ namespace Senno.SmartContracts.SRSC
                 if (tokensCount > 0)
                 {
                     // call external method for transfer token to address 'to'
-                    if (((bool)TokenSmartContract("transfer", from, to, tokensCount)))
+                    if ((bool)TokenSmartContract("transfer", coinBase, to, tokensCount))
                     {
                         // if the transfer operation is successful
                         // calculate the rest of the current payload
-                        payload = payload - tokensCount;
+                        payload = payload % swapRate;
                     }
                 }
             }

@@ -11,15 +11,10 @@ namespace Senno.SmartContracts.SPDSC
         /// <summary>
         /// Initial Verification needed
         /// </summary>
-        public static ushort InitialVerificationNeeded = 2;
-
-        /// <summary>
-        /// Name of the RewardsSmartContractScriptHash operation
-        /// </summary>
-        public static string RewardsOperationName = "parse";
+        public static ushort InitialVerificationNeeded() => 2;
 
         // TODO set RewardsSmartContractScriptHash
-        [Appcall("d31b0b6440ecebe0861f4683831c04a0cd497943")]
+        [Appcall("983853e311a9b48777bf6bc40eabe21c31883c46")]
         public static extern object RewardsSmartContract(string method, params object[] args);
 
         public delegate void TaskNotificationAction<in T, in T1>(T p0, T1 p1);
@@ -30,27 +25,27 @@ namespace Senno.SmartContracts.SPDSC
         public static object Main(string operation, params object[] args)
         {
             // get task by number
-            if (operation == "gettask")
+            if (operation == Operations.GetTask)
             {
                 return GetTask(args);
             }
             // create new task
-            if (operation == "createtask")
+            if (operation == Operations.CreateTask)
             {
                 return CreateTask(args);
             }
             // take a task to perform
-            if (operation == "taketask")
+            if (operation == Operations.TakeTask)
             {
                 return TakeTask(args);
             }
             // complete a task
-            if (operation == "completetask")
+            if (operation == Operations.CompleteTask)
             {
                 return CompleteTask(args);
             }
             // varify a task
-            if (operation == "verifytask")
+            if (operation == Operations.VerifyTask)
             {
                 return VerifyTask(args);
             }
@@ -64,12 +59,15 @@ namespace Senno.SmartContracts.SPDSC
         private static object GetTask(params object[] args)
         {
             // get task number from arguments
-            string taskNumber = (string)args[0];
+            BigInteger taskNumber = (BigInteger)args[0];
 
             // get task from storage
-            StorageMap task_sm = Storage.CurrentContext.CreateMap("task");
+            // StorageMap task_sm = Storage.CurrentContext.CreateMap("task");
 
-            return task_sm.Get(taskNumber).Deserialize();
+            var task = Storage.Get(Storage.CurrentContext, taskNumber.AsByteArray());
+            if (task == null || task.Length == 0) return false;
+            return task.Deserialize();
+            //return task_sm.Get(taskNumber.Serialize()).Deserialize();
         }
 
         /// <summary>
@@ -85,23 +83,22 @@ namespace Senno.SmartContracts.SPDSC
             string source = (string)args[0];
 
             // create new task
-            var newTask = new Task()
+            var task = new Task()
             {
                 Number = taskNumber,
                 Status = (byte)TaskStatusEnum.Created,
                 Source = source,
-                VerificationNeeded = InitialVerificationNeeded,
-                Verifications = new Verification[InitialVerificationNeeded]
+                VerificationNeeded = InitialVerificationNeeded(),
+                Verifications = new Verification[InitialVerificationNeeded()]
             };
 
             // save task to storage
-            StorageMap task_sm = Storage.CurrentContext.CreateMap("task");
-            task_sm.Put(taskNumber.Serialize(), newTask.Serialize());
+            Storage.Put(Storage.CurrentContext, taskNumber.AsByteArray(), task.Serialize());
 
             // event for platform
             TaskNotification("create", taskNumber);
 
-            return true;
+            return taskNumber;
         }
 
         /// <summary>
@@ -115,8 +112,10 @@ namespace Senno.SmartContracts.SPDSC
             byte[] caller = (byte[])args[1];
 
             // get task from storage
-            StorageMap task_sm = Storage.CurrentContext.CreateMap("task");
-            Task task = (Task)task_sm.Get(taskNumber.ToByteArray()).Deserialize();
+            var storageTask = Storage.Get(Storage.CurrentContext, taskNumber.AsByteArray());
+            if (storageTask == null || storageTask.Length == 0) return false;
+
+            Task task = (Task)storageTask.Deserialize();
             if (task.Number == 0)
             {
                 return false;
@@ -138,7 +137,7 @@ namespace Senno.SmartContracts.SPDSC
             task.Status = (byte)TaskStatusEnum.Working;
 
             // save task to storage
-            task_sm.Put(taskNumber.AsByteArray(), task.Serialize());
+            Storage.Put(Storage.CurrentContext, taskNumber.AsByteArray(), task.Serialize());
 
             // event for platform
             TaskNotification("taketask", task.Number);
@@ -161,9 +160,10 @@ namespace Senno.SmartContracts.SPDSC
             BigInteger payload = (BigInteger)args[3];
 
             // get task from storage
-            StorageMap task_sm = Storage.CurrentContext.CreateMap("task");
-            Task task = (Task)task_sm.Get(taskNumber.AsByteArray()).Deserialize();
+            var storageTask = Storage.Get(Storage.CurrentContext, taskNumber.AsByteArray());
+            if (storageTask == null || storageTask.Length == 0) return false;
 
+            Task task = (Task)storageTask.Deserialize();
             // Task not exist or caller is not task owner or tast not in working status
             if (task.Number == 0 || task.Owner != caller || task.Status != (byte)TaskStatusEnum.Working)
             {
@@ -185,7 +185,7 @@ namespace Senno.SmartContracts.SPDSC
                 TaskNotification("verificationneeded", task.Number);
 
                 // save task to storage
-                task_sm.Put(taskNumber.AsByteArray(), task.Serialize());
+                Storage.Put(Storage.CurrentContext, taskNumber.AsByteArray(), task.Serialize());
             }
             else
             {
@@ -194,7 +194,6 @@ namespace Senno.SmartContracts.SPDSC
 
                 // finish
                 FinishTask(task, null, task.Payload);
-
             }
             return true;
         }
@@ -214,11 +213,14 @@ namespace Senno.SmartContracts.SPDSC
             BigInteger payload = (BigInteger)args[3];
 
             // get task from storage
-            StorageMap task_sm = Storage.CurrentContext.CreateMap("task");
-            Task task = (Task)task_sm.Get(taskNumber).Deserialize();
+            var storageTask = Storage.Get(Storage.CurrentContext, taskNumber.AsByteArray());
+            if (storageTask == null || storageTask.Length == 0) return false;
 
-            // Task not exist or verifiacation don't needed or caller is task owner or tast not in verifying status
-            if (task.Number == 0 || task.VerificationNeeded == 0 || task.Owner == caller || task.Status != (byte)TaskStatusEnum.Verifying)
+            Task task = (Task)storageTask.Deserialize();
+
+            // Task not exist or verifiacation don't needed or caller is task owner or task not in verifying status
+            if (task.Number == 0 || task.VerificationNeeded == 0 || task.Owner == caller ||
+                task.Status != (byte)TaskStatusEnum.Verifying)
             {
                 return false;
             }
@@ -239,31 +241,35 @@ namespace Senno.SmartContracts.SPDSC
                 byte[][] verificators = new byte[task.Verifications.Length][];
                 // calculating the success of a task
                 int successResults = 0;
-                BigInteger sumPayload = 0;
+                BigInteger sumPayload = task.Payload;
                 for (int i = 0; i < task.Verifications.Length; i++)
                 {
                     var verification = task.Verifications[i];
-                    verificators[i] = task.Owner;
+                    verificators[i] = verification.Owner;
                     if (verification.Result)
                     {
-                        successResults = successResults + 1;
-                        sumPayload = sumPayload + verification.Payload;
+                        successResults++;
+                        sumPayload += verification.Payload;
                     }
                 }
-
                 BigInteger avgPayload = 0;
                 if (successResults > 0)
                 {
-                    avgPayload = sumPayload / successResults;
+                    avgPayload = sumPayload / successResults + 1;
                 }
-
                 // set the success of a task
-                task.IsSuccess = successResults > task.Verifications.Length;
-
+                task.IsSuccess = successResults >= task.Verifications.Length / 2;
                 // finish
                 FinishTask(task, verificators, avgPayload);
             }
+            else
+            {
+                // save task to storage
+                Storage.Put(Storage.CurrentContext, taskNumber.AsByteArray(), task.Serialize());
 
+                // event for platform
+                TaskNotification("verifyTask", task.Number);
+            }
             return true;
         }
 
@@ -275,20 +281,15 @@ namespace Senno.SmartContracts.SPDSC
         {
             if (task.Status != (byte)TaskStatusEnum.Finished)
             {
-
                 // set task status
                 task.Status = (byte)TaskStatusEnum.Finished;
 
-                // get task from storage
-                StorageMap task_sm = Storage.CurrentContext.CreateMap("task");
-
                 // save task to storage
-                task_sm.Put(task.Number.AsByteArray(), task.Serialize());
-
+                Storage.Put(Storage.CurrentContext, task.Number.AsByteArray(), task.Serialize());
                 if (task.IsSuccess)
                 {
                     // rewards
-                    RewardsSmartContract(RewardsOperationName, task.Owner, payload, verificators);
+                   RewardsSmartContract(Operations.Parse, task.Owner, payload, verificators);
                 }
 
                 // event for platform
@@ -301,7 +302,13 @@ namespace Senno.SmartContracts.SPDSC
         /// </summary>
         private static BigInteger GetTasksCounter()
         {
-            return Storage.Get(Storage.CurrentContext, "tasksCounter").AsBigInteger();
+            byte[] counter = Storage.Get(Storage.CurrentContext, "tasksCounter");
+
+            if (counter == null || counter.Length == 0)
+            {
+                return 0;
+            }
+            return counter.AsBigInteger();
         }
 
         /// <summary>

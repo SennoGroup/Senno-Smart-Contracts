@@ -1,4 +1,6 @@
-﻿namespace Senno.SmartContracts.Common
+﻿using System.Numerics;
+
+namespace Senno.SmartContracts.Common
 {
     /// <summary>
     /// Job
@@ -8,7 +10,7 @@
         /// <summary>
         /// Job number
         /// </summary>
-        public string Number { get; set; }
+        public BigInteger Number { get; set; }
         /// <summary>
         /// Job type <see cref="JobTypeEnum"/>
         /// </summary>

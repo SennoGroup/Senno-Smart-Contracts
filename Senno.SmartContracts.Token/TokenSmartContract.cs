@@ -21,15 +21,21 @@ namespace Senno.SmartContracts
         [DisplayName("transfer")]
         public static event TransferAction<byte[], byte[], BigInteger> Transferred;
 
+        /// <summary>
+        /// Smart contract entry method
+        /// </summary>
+        /// <param name="operation"></param>
+        /// <param name="args"></param>
+        /// <returns></returns>
         public static object Main(string operation, params object[] args)
         {
-            if (operation == "deploy") return Deploy();
-            if (operation == "totalSupply") return TotalSupply();
-            if (operation == "name") return Name();
-            if (operation == "symbol") return Symbol();
-            if (operation == "owner") return owner;
-            if (operation == "decimals") return Decimals();
-            if (operation == "transfer")
+            if (operation == Operations.Deploy) return Deploy();
+            if (operation == Operations.TotalSupply) return TotalSupply();
+            if (operation == Operations.Name) return Name();
+            if (operation == Operations.Symbol) return Symbol();
+            if (operation == Operations.Owner) return owner;
+            if (operation == Operations.Decimals) return Decimals();
+            if (operation == Operations.Transfer)
             {
                 if (args.Length != 3) return false;
                 byte[] from = (byte[])args[0];
@@ -37,7 +43,7 @@ namespace Senno.SmartContracts
                 BigInteger value = (BigInteger)args[2];
                 return Transfer(from, to, value);
             }
-            if (operation == "balanceOf")
+            if (operation == Operations.BalanceOf)
             {
                 if (args.Length != 1) return 0;
                 byte[] account = (byte[])args[0];
@@ -72,10 +78,10 @@ namespace Senno.SmartContracts
         public static bool Transfer(byte[] from, byte[] to, BigInteger value)
         {
             // Verifies that the calling contract has verified the required script hashes of the transaction/block
-            if (!Runtime.CheckWitness(from))
+            /*if (!Runtime.CheckWitness(from))
             {
                 return false;
-            }
+            }*/
             if (value <= 0) return false;
             // Address only
             if (to.Length != 20) return false;

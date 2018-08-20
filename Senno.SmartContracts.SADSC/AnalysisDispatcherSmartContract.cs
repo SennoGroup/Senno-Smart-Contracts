@@ -19,7 +19,7 @@ namespace Senno.SmartContracts.SADSC
         public static string RewardsOperationName = "analysis";
 
         // TODO set RewardsSmartContractScriptHash
-        [Appcall("d31b0b6440ecebe0861f4683831c04a0cd497943")]
+        [Appcall("7e0ee1fbe72dd59028b49a7f8b1e9c9e3b8350de")]
         public static extern object RewardsSmartContract(string method, params object[] args);
 
         public delegate void TaskNotificationAction<in T, in T1>(T p0, T1 p1);
@@ -30,27 +30,27 @@ namespace Senno.SmartContracts.SADSC
         public static object Main(string operation, params object[] args)
         {
             // get task by number
-            if (operation == "gettask")
+            if (operation == Operations.GetTask)
             {
                 return GetTask(args);
             }
             // create new task
-            if (operation == "createtask")
+            if (operation == Operations.CreateTask)
             {
                 return CreateTask(args);
             }
             // take a task to perform
-            if (operation == "taketask")
+            if (operation == Operations.TakeTask)
             {
                 return TakeTask(args);
             }
             // complete a task
-            if (operation == "completetask")
+            if (operation == Operations.CompleteTask)
             {
                 return CompleteTask(args);
             }
             // varify a task
-            if (operation == "verifytask")
+            if (operation == Operations.VerifyTask)
             {
                 return VerifyTask(args);
             }
@@ -252,7 +252,7 @@ namespace Senno.SmartContracts.SADSC
                 }
 
                 BigInteger avgPayload = 0;
-                if (successResults > 0)
+                if(successResults > 0)
                 {
                     avgPayload = sumPayload / successResults;
                 }
