@@ -12,7 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Neo.Manager\Neo.Manager.csproj" />
-    <ProjectReference Include="..\Senno.SmartContracts.Common\Senno.SmartContracts.Common.csproj" />
+    <ProjectReference Include="..\SmartContracts\Senno.SmartContracts.Common\Senno.SmartContracts.Common.csproj" />
   </ItemGroup>
 
   <ItemGroup>

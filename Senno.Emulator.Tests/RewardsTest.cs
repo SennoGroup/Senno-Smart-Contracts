@@ -50,19 +50,7 @@ namespace Senno.Tests
             Assert.IsFalse(result, "Invalid operation execution result should be false");
         }
 
-        [Test]
-        public void T02_CheckRewardsForParse()
-        {
-            var _scriptHash = Configuration.TokenSmartContractOwner.HexToBytes();
-            var transferPayload = new BigInteger(1000);
-            var rewardsResult = _emulator.Execute(
-                Operations.Parse,
-                _scriptHash,
-                transferPayload,
-                _scriptHashes).GetBoolean();
-            Console.WriteLine($"Rewards result: {rewardsResult}");
-            Assert.IsTrue(rewardsResult);
-        }
+        
 
     }
 }
