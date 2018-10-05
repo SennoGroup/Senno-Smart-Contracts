@@ -82,5 +82,11 @@
         public const string DataShareManagerDelete = "datasharemanagerdelete";
 
         #endregion
+
+        #region SoftwareDevelopment
+
+        public const string SoftwareDevelopmentReward = "reward";
+
+        #endregion
     }
 }

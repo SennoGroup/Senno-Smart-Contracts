@@ -8,9 +8,9 @@ namespace Senno.SmartContracts
     public class RewardsSmartContract : SmartContract
     {
         // safe store of SEN tokens
-        private static readonly byte[] CoinBase = Configuration.TokenSmartContractOwner.HexToBytes();
+        private static readonly byte[] CoinBase = Configuration.TokenSmartContractOwner.ToScriptHash();
 
-        [Appcall("fb242317556ff96f6827e7115750554c86f124a5")]
+        [Appcall("8a5f11a1c82a064be5d9e355bed78b57a01200b5")]
         public static extern object TokenSmartContract(string method, params object[] args);
 
         /// <summary>
@@ -24,7 +24,8 @@ namespace Senno.SmartContracts
             // calculate and pay reward for payload
             if (operation == Operations.RewardsReward)
             {
-                return RewardsForTask((byte[])args[0], (BigInteger)args[1], (object[])args[2], (int)args[3], (int)args[4], (byte)args[5]);
+                if (args.Length != 6) return false;
+                return RewardsForTask((byte[])args[0], (BigInteger)args[1], (int)args[2], (object[])args[3], (int)args[4], (byte)args[5]);
             }
 
             return false;
@@ -35,12 +36,12 @@ namespace Senno.SmartContracts
         /// </summary>
         /// <param name="taskWorker"></param>
         /// <param name="payload"></param>
-        /// <param name="taskVerificators"></param>
         /// <param name="workerSwapRate"></param>
+        /// <param name="taskVerificators"></param>
         /// <param name="verificatorSwapRate"></param>
         /// <param name="taskType"></param>
         /// <returns></returns>
-        private static object RewardsForTask(byte[] taskWorker, BigInteger payload, object[] taskVerificators, int workerSwapRate, int verificatorSwapRate, byte taskType)
+        private static bool RewardsForTask(byte[] taskWorker, BigInteger payload, int workerSwapRate, object[] taskVerificators, int verificatorSwapRate, byte taskType)
         {
             Rewards(taskWorker, payload, workerSwapRate, taskType);
 
@@ -57,9 +58,9 @@ namespace Senno.SmartContracts
         /// <summary>
         /// Pay reward to address
         /// </summary>
-        private static void Rewards(byte[] to, BigInteger payload, int swapRate, byte taskType)
+        // ReSharper disable once UnusedMethodReturnValue.Local
+        private static bool Rewards(byte[] to, BigInteger payload, int swapRate, byte taskType)
         {
-            //TODO: store payload by taskType
             // get stored payload from storage by address 'to'
             BigInteger storedPayload = 0;
             string key = taskType + "_" + to;
@@ -78,6 +79,8 @@ namespace Senno.SmartContracts
             {
                 Storage.Put(Storage.CurrentContext, key, storedPayload);
             }
+
+            return transferResult;
         }
 
         /// <summary>

@@ -48,7 +48,7 @@ namespace Senno.SmartContracts.Tests.STSC.UnitTests
         public void T02_CheckOwner()
         {
             var owner = _emulator.Execute(Operations.TokenOwner).GetByteArray().ToHexString();
-            Assert.Equal(Configuration.TokenSmartContractOwner, owner);
+            Assert.Equal(Configuration.TokenSmartContractOwner.AddressToScriptHash().ToHexString(), owner);
         }
 
         [Fact]
@@ -144,7 +144,7 @@ namespace Senno.SmartContracts.Tests.STSC.UnitTests
             Assert.True(deployResult);
 
             var balanceResult = _emulator
-                .Execute(Operations.TokenBalanceOf, null, Configuration.TokenSmartContractOwner.HexToBytes())
+                .Execute(Operations.TokenBalanceOf, null, Configuration.TokenSmartContractOwner.AddressToScriptHash())
                 .GetBigInteger();
             Assert.Equal(balanceResult, Configuration.TokenSmartContractInitSupply);
         }
@@ -165,7 +165,7 @@ namespace Senno.SmartContracts.Tests.STSC.UnitTests
         [Fact]
         public void T15_CheckOwnerTransferBeforeDeploy()
         {
-            var scriptHash = Configuration.TokenSmartContractOwner.HexToBytes();
+            var scriptHash = Configuration.TokenSmartContractOwner.AddressToScriptHash();
             var account = _accounts.First();
             var amount = 1000;
 
@@ -180,7 +180,7 @@ namespace Senno.SmartContracts.Tests.STSC.UnitTests
             var deployResult = _emulator.Execute(Operations.TokenDeploy).GetBoolean();
             Assert.True(deployResult);
 
-            var scriptHash = Configuration.TokenSmartContractOwner.HexToBytes();
+            var scriptHash = Configuration.TokenSmartContractOwner.AddressToScriptHash();
             var accountScriptHash = _accounts.First().keys.address.AddressToScriptHash();
             var amount = 1200;
 

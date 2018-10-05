@@ -13,10 +13,10 @@ namespace Senno.SmartContracts
     /// </summary>
     public class TaskDispatcherSmartContract : SmartContract
     {
-        [Appcall("0d4a40411eded4c788707dcdb88abccf93356df5")]
+        [Appcall("b4cde8ad63e3c3a3f2c32011c0f3543292f04ccf")]
         public static extern object RewardsSmartContract(string method, params object[] args);
 
-        [Appcall("3b2d0d3240bfdea5fabe1833d90271f4c519b974")]
+        [Appcall("f0293e36c862fa3a990f44eadc7509b99fded23c")]
         public static extern object ClientsSmartContract(string method, params object[] args);
 
         public delegate void TaskNotificationAction<in T, in T1, in T2, in T3>(T p0, T1 p1, T2 p2, T3 p3);
@@ -287,7 +287,7 @@ namespace Senno.SmartContracts
                 if (task.IsSuccess)
                 {
                     // rewards
-                    RewardsSmartContract(Operations.RewardsReward, task.Worker, payload, verificators, task.WorkerSwaprate, task.VerificatorSwaprate, task.Type);
+                    RewardsSmartContract(Operations.RewardsReward, task.Worker, payload, task.WorkerSwaprate, verificators, task.VerificatorSwaprate, task.Type);
                 }
 
                 // event for platform

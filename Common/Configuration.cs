@@ -10,7 +10,7 @@
         /// <summary>
         /// Address wallet of the owner TokenSmartContract
         /// </summary>
-        public const string TokenSmartContractOwner = "bb4b3659159122b242e0674131fe0656aff8c356";
+        public const string TokenSmartContractOwner = "APgeXL3KRP1kGf4MVPLF2muRUB8U6s5cgz";
 
         /// <summary>
         /// Token smart contract name 
@@ -67,6 +67,15 @@
         /// 
         /// </summary>
         public const byte TaskCandidatesInWorkerNumber = 2;
+
+        #endregion
+
+        #region SDSC
+
+        /// <summary>
+        /// Payload exchange rate for Software development smart contract
+        /// </summary>
+        public const int SoftwareDevelopmentSmartContractSwapRate = 1000;
 
         #endregion
     }

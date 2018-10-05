@@ -9,13 +9,15 @@ namespace Senno.SmartContracts.Tests.Common
     public static class Helper
     {
         public const string TokenSmartContractFilePath =
-            "../../../../../Senno.SmartContracts/STSC/bin/Debug/Senno.SmartContracts.STSC.avm";
+            "../../../../../Senno-Smart-Contracts/STSC/bin/Debug/Senno.SmartContracts.STSC.avm";
         public const string RewardsSmartContractFilePath =
-            "../../../../../Senno.SmartContracts/SRSC/bin/Debug/Senno.SmartContracts.SRSC.avm";
+            "../../../../../Senno-Smart-Contracts/SRSC/bin/Debug/Senno.SmartContracts.SRSC.avm";
         public const string ClientsSmartContractFilePath =
-            "../../../../../Senno.SmartContracts/SCSC/bin/Debug/Senno.SmartContracts.SCSC.avm";
+            "../../../../../Senno-Smart-Contracts/SCSC/bin/Debug/Senno.SmartContracts.SCSC.avm";
         public const string TaskDispatcherSmartContractFilePath =
-            "../../../../../Senno.SmartContracts/STDSC/bin/Debug/Senno.SmartContracts.STDSC.avm";
+            "../../../../../Senno-Smart-Contracts/STDSC/bin/Debug/Senno.SmartContracts.STDSC.avm";
+        public const string PublicKeysManagerSmartContractFilePath =
+            "../../../../../Senno-Smart-Contracts/SPKMSC/bin/Debug/Senno.SmartContracts.SPKMSC.avm";
 
         public static StackItem Execute(this Emulator emulator, string operation, IScriptTable table = null,
             params object[] args)

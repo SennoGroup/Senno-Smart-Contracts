@@ -10,7 +10,7 @@ namespace Senno.SmartContracts
 {
     public class TokenSmartContract : SmartContract
     {
-        private static readonly byte[] Owner = Configuration.TokenSmartContractOwner.HexToBytes();
+        private static readonly byte[] Owner = Configuration.TokenSmartContractOwner.ToScriptHash();
 
         // Token Settings
         private static string Name() => Configuration.TokenSmartContractName;
